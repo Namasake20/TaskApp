@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.namasake.task.databinding.TastItemBinding
+import com.namasake.task.feature_task.data.remote.TaskDto
+import com.namasake.task.feature_task.doman.model.Task
 
 class TaskAdapter: RecyclerView.Adapter<TaskAdapter.TaskViewHolder> () {
 
