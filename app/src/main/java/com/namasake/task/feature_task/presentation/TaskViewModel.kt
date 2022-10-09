@@ -1,20 +1,21 @@
 package com.namasake.task.feature_task.presentation
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.namasake.task.feature_task.core.util.Resource
-import com.namasake.task.feature_task.data.remote.TaskDto
 import com.namasake.task.feature_task.doman.model.Task
-import com.namasake.task.feature_task.doman.use_case.GetTasks
+import com.namasake.task.feature_task.doman.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskViewModel @Inject constructor(private val getTasks: GetTasks): ViewModel() {
+class TaskViewModel @Inject constructor(private val useCase: UseCase): ViewModel() {
     sealed class TaskEvent {
         class Success(val result: List<Task>?): TaskEvent()
         class Failure(val error: String): TaskEvent()
@@ -22,12 +23,15 @@ class TaskViewModel @Inject constructor(private val getTasks: GetTasks): ViewMod
         object Empty : TaskEvent()
     }
 
+    var saveResponse: MutableLiveData<Response<Task>> = MutableLiveData()
+
     private val _task = MutableStateFlow<TaskEvent>(TaskEvent.Empty)
     val task: StateFlow<TaskEvent> = _task
 
+
     fun getNewTask(){
         viewModelScope.launch (Dispatchers.IO){
-            getTasks().collect{result ->
+            useCase.fetchTasks().collect{ result ->
                 when(result){
                     is Resource.Success ->
                     {
@@ -48,5 +52,14 @@ class TaskViewModel @Inject constructor(private val getTasks: GetTasks): ViewMod
         }
     }
 
+    fun saveNewTask(task: Task){
+        viewModelScope.launch {
+            val response = useCase.saveNewTask(task)
+            saveResponse.value = response
+        }
+    }
+    suspend fun deleteTask(id: Int){
+        useCase.deleteTask(id)
+    }
 
 }

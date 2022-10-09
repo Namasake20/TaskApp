@@ -48,4 +48,4 @@ The response from the api looks like this:
 # Screenshots
 | Light Mode | Dark Mode |
 |:-:|:-:|
-| ![1](screenshots/task_light.png?raw=true) | ![3](screenshots/task_dark.png?raw=true) |
+| ![1](screenshots/task1.png?raw=true) | ![3](screenshots/task2.png?raw=true) |

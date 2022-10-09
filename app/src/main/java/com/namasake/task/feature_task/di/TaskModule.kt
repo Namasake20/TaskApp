@@ -7,7 +7,7 @@ import com.namasake.task.feature_task.data.remote.TaskApi
 import com.namasake.task.feature_task.data.remote.TaskApi.Companion.BASE_URL
 import com.namasake.task.feature_task.data.repo.MainRepoImpl
 import com.namasake.task.feature_task.doman.repo.MainRepo
-import com.namasake.task.feature_task.doman.use_case.GetTasks
+import com.namasake.task.feature_task.doman.use_case.UseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,7 +39,8 @@ object TaskModule {
 
     @Singleton
     @Provides
-    fun provideGetPredictionUseCase(repository: MainRepo):GetTasks{
-        return GetTasks(repository)
+    fun provideGetPredictionUseCase(repository: MainRepo):UseCase{
+        return UseCase(repository)
     }
+
 }

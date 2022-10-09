@@ -1,4 +1,4 @@
-package com.namasake.task
+package com.namasake.task.feature_task.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.namasake.task.databinding.TastItemBinding
-import com.namasake.task.feature_task.data.remote.TaskDto
 import com.namasake.task.feature_task.doman.model.Task
 
 class TaskAdapter: RecyclerView.Adapter<TaskAdapter.TaskViewHolder> () {
@@ -27,6 +26,14 @@ class TaskAdapter: RecyclerView.Adapter<TaskAdapter.TaskViewHolder> () {
     var tasks: List<Task>
         get() = differ.currentList
         set(value) {differ.submitList(value)}
+
+
+    fun getId(position: Int):Int{
+        return tasks.get(position).id
+    }
+    fun getTitle(position: Int):String{
+        return tasks.get(position).title
+    }
 
     override fun getItemCount() = tasks.size
 

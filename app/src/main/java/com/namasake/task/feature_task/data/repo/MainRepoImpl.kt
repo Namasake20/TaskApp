@@ -2,13 +2,13 @@ package com.namasake.task.feature_task.data.repo
 
 import com.namasake.task.feature_task.core.util.Resource
 import com.namasake.task.feature_task.data.local.TaskDao
-import com.namasake.task.feature_task.data.local.TaskEntity
 import com.namasake.task.feature_task.data.remote.TaskApi
 import com.namasake.task.feature_task.doman.model.Task
 import com.namasake.task.feature_task.doman.repo.MainRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
+import retrofit2.Response
 import java.io.IOException
 import javax.inject.Inject
 
@@ -40,4 +40,13 @@ class MainRepoImpl @Inject constructor(
         emit(Resource.Success(newTasks))
 
     }
+
+    override suspend fun saveTask(task: Task): Response<Task> {
+        return api.saveTask(task)
+    }
+
+    override suspend fun deleteTask(id: Int) {
+        api.deleteTask(id)
+    }
+
 }

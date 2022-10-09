@@ -1,6 +1,7 @@
 package com.namasake.task.feature_task.data.remote
 
 import com.namasake.task.feature_task.data.local.TaskEntity
+import com.namasake.task.feature_task.doman.model.Task
 
 data class TaskDto(
     val completed: Boolean,
