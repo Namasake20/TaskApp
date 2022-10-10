@@ -15,4 +15,6 @@ class UseCase(private val repo: MainRepo) {
     }
 
     suspend fun deleteTask(id: Int) = repo.deleteTask(id)
+
+    suspend fun updateTask(id: Int,completed:Boolean) = repo.updateTask(id, completed)
 }

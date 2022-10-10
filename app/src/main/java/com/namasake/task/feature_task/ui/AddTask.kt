@@ -4,12 +4,15 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import com.namasake.task.databinding.ActivityAddTaskBinding
 import com.namasake.task.feature_task.doman.model.Task
 import com.namasake.task.feature_task.presentation.TaskViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import retrofit2.HttpException
+import java.io.IOException
 
 @AndroidEntryPoint
 class AddTask : AppCompatActivity() {
@@ -29,8 +32,14 @@ class AddTask : AppCompatActivity() {
             }
             else{
                 val data = Task(false,randomInt, binding.edtTitle.editText?.text.toString())
-                newViewModel.saveNewTask(data)
-                saveData()
+                try {
+                    newViewModel.saveNewTask(data)
+                    saveData()
+                }catch (e:HttpException){
+                    Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show()
+                }catch (e:IOException){
+                    Toast.makeText(this, "No internet", Toast.LENGTH_SHORT).show()
+                }
             }
             Intent(this,MainActivity::class.java).also {
                 startActivity(it)

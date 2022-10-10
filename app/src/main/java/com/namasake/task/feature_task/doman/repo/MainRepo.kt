@@ -9,4 +9,5 @@ interface MainRepo {
     fun getTasks(): Flow<Resource<List<Task>>>
     suspend fun saveTask(task: Task):Response<Task>
     suspend fun deleteTask(id: Int)
+    suspend fun updateTask(id: Int,completed:Boolean):Response<Task>
 }

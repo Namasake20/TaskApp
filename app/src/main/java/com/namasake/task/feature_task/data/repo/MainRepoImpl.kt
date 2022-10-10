@@ -49,4 +49,8 @@ class MainRepoImpl @Inject constructor(
         api.deleteTask(id)
     }
 
+    override suspend fun updateTask(id: Int, completed: Boolean): Response<Task> {
+        return api.updateTask(id,completed)
+    }
+
 }

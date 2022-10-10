@@ -1,8 +1,13 @@
 package com.namasake.task.feature_task.ui
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.BoringLayout
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
@@ -14,17 +19,22 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.snackbar.Snackbar
+import com.namasake.task.R
 import com.namasake.task.databinding.ActivityMainBinding
+import com.namasake.task.databinding.TastItemBinding
 import com.namasake.task.feature_task.doman.model.Task
 import com.namasake.task.feature_task.presentation.TaskViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 const val TAG = "MainActivity"
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),TaskAdapter.OnTaskClickListener {
     private  lateinit var binding: ActivityMainBinding
     private lateinit var taskAdapter: TaskAdapter
     private val viewModel:TaskViewModel by viewModels()
@@ -46,6 +56,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(it)
             }
         }
+
     }
 
     private suspend fun observeData() {
@@ -54,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 is TaskViewModel.TaskEvent.Success -> {
                     binding.progressBar.isVisible = false
                     binding.rvTasks.apply {
-                        taskAdapter = TaskAdapter()
+                        taskAdapter = TaskAdapter(this@MainActivity)
                         adapter = taskAdapter
                         layoutManager = LinearLayoutManager(this@MainActivity)
                         val swipeGesture = object : SwipeGesture(){
@@ -64,21 +75,30 @@ class MainActivity : AppCompatActivity() {
                             ) {
                                 val deletedTask:Task = taskAdapter.tasks[viewHolder.adapterPosition]
                                 lifecycleScope.launch {
-                                    viewModel.deleteTask(deletedTask.id)
-                                    val mySnackbar = Snackbar.make(binding.rvTasks,"Deleted "+deletedTask.title,Snackbar.LENGTH_LONG)
-                                    val textView:TextView = mySnackbar.view.findViewById(com.google.android.material.R.id.snackbar_action);
-                                    textView.isAllCaps = false
-                                    mySnackbar.setAction("Undo"
-                                    ) {
-                                        viewModel.saveNewTask(
+                                    try {
+                                        viewModel.deleteTask(deletedTask.id)
+
+                                        val mySnackbar = Snackbar.make(binding.rvTasks,"Deleted "+deletedTask.title,Snackbar.LENGTH_LONG)
+                                        val textView:TextView = mySnackbar.view.findViewById(com.google.android.material.R.id.snackbar_action);
+                                        textView.isAllCaps = false
+                                        val color = R.color.teal_200
+                                        textView.setTextColor(color)
+                                        mySnackbar.setAction("Undo") { viewModel.saveNewTask(
                                             Task(
                                                 false,
                                                 deletedTask.id,
                                                 deletedTask.title)
-                                            )
-                                    }.show()
-                                    taskAdapter.notifyDataSetChanged()
-                                    viewModel.getNewTask()
+                                        )
+                                        }.show()
+                                        taskAdapter.notifyDataSetChanged()
+                                        viewModel.getNewTask()
+                                    }
+                                    catch (e:IOException){
+                                        Snackbar.make(binding.rvTasks,"No internet",Snackbar.LENGTH_SHORT).show()
+                                    }
+                                    catch (e:HttpException){
+                                        Snackbar.make(binding.rvTasks,"Error",Snackbar.LENGTH_SHORT).show()
+                                    }
 
                                 }
                             }
@@ -102,6 +122,47 @@ class MainActivity : AppCompatActivity() {
 
             }
 
+        }
+
+    }
+
+    override fun onTaskClickListener(task: Task, position: Int) {
+        lifecycleScope.launch {
+            try {
+                viewModel.updateTask(task.id,true)
+            }catch (e:HttpException){
+                Toast.makeText(parent, "error", Toast.LENGTH_SHORT).show()
+            }catch (e:HttpException){
+                Toast.makeText(parent, "Error", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onResume() {
+        if (checkInternet(this)){
+//            Toast.makeText(this, "Iko", Toast.LENGTH_SHORT).show()
+        }else{
+            Snackbar.make(binding.root,"No Internet Connection",Snackbar.LENGTH_LONG).show()
+        }
+        super.onResume()
+    }
+    fun checkInternet(context: Context):Boolean{
+        val connManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            val net = connManager.activeNetwork ?: return false
+            val activeNet = connManager.getNetworkCapabilities(net) ?: return false
+
+            return when{
+                activeNet.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+
+                activeNet.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+
+                else -> false
+            }
+        }else{
+            @Suppress("DEPRECATION")
+            val newtworkInfo = connManager.activeNetworkInfo ?: return false
+            return newtworkInfo.isConnected
         }
 
     }

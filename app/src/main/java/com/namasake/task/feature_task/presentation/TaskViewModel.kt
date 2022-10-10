@@ -24,6 +24,7 @@ class TaskViewModel @Inject constructor(private val useCase: UseCase): ViewModel
     }
 
     var saveResponse: MutableLiveData<Response<Task>> = MutableLiveData()
+    var updateResponse:MutableLiveData<Response<Task>> = MutableLiveData()
 
     private val _task = MutableStateFlow<TaskEvent>(TaskEvent.Empty)
     val task: StateFlow<TaskEvent> = _task
@@ -60,6 +61,13 @@ class TaskViewModel @Inject constructor(private val useCase: UseCase): ViewModel
     }
     suspend fun deleteTask(id: Int){
         useCase.deleteTask(id)
+    }
+
+    suspend fun updateTask(id: Int,completed:Boolean){
+        viewModelScope.launch {
+            val res = useCase.updateTask(id,completed)
+            updateResponse.value = res
+        }
     }
 
 }

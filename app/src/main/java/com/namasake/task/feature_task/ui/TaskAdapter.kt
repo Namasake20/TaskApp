@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.namasake.task.databinding.TastItemBinding
 import com.namasake.task.feature_task.doman.model.Task
 
-class TaskAdapter: RecyclerView.Adapter<TaskAdapter.TaskViewHolder> () {
+class TaskAdapter(private val taskClickListener:OnTaskClickListener): RecyclerView.Adapter<TaskAdapter.TaskViewHolder> () {
 
     inner class TaskViewHolder(val binding: TastItemBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -28,19 +28,21 @@ class TaskAdapter: RecyclerView.Adapter<TaskAdapter.TaskViewHolder> () {
         set(value) {differ.submitList(value)}
 
 
-    fun getId(position: Int):Int{
-        return tasks.get(position).id
-    }
-    fun getTitle(position: Int):String{
-        return tasks.get(position).title
+    interface OnTaskClickListener{
+        fun onTaskClickListener(task: Task, position: Int)
+
     }
 
     override fun getItemCount() = tasks.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        return TaskViewHolder(TastItemBinding.inflate(
-            LayoutInflater.from(parent.context
-        ),parent,false))
+        val binder = TastItemBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        val holder = TaskViewHolder(binder)
+        binder.cbDone.setOnClickListener {
+            val position = holder.adapterPosition.takeIf { it != DiffUtil.DiffResult.NO_POSITION } ?: return@setOnClickListener
+            taskClickListener.onTaskClickListener(tasks[position], position)
+        }
+        return holder
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
